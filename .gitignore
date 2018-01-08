@@ -1,0 +1,12 @@
+*.pidb
+*.userprefs
+[Bb]in/
+[Oo]bj/
+*.suo
+*.user
+*.sln.docstates
+[Xx]64/
+[Rr]elease/
+[Dd]ebug/
+.vs/
+*.aps

@@ -35,7 +35,7 @@
 
 static long
 query_regkey(HKEY hkey, char *subkey, ULONG rights,
-             char *buf, unsigned long *siz)
+			 char *buf, unsigned long *siz)
 {
 	LONG res;
 	HKEY hsubkey;
@@ -67,9 +67,9 @@ query_envvar(char *envvar, char *buf, unsigned long *siz)
 
 int WINAPI
 WinMain(HINSTANCE hInstance,
-        HINSTANCE hPrevInstance,
-        LPSTR lpCmdLine,
-        int nCmdShow)
+		HINSTANCE hPrevInstance,
+		LPSTR lpCmdLine,
+		int nCmdShow)
 {
 	(void)hInstance;
 	(void)hPrevInstance;
@@ -106,12 +106,12 @@ WinMain(HINSTANCE hInstance,
 	if (!found) {
 		siz = sizeof(cmd) - 3;
 		res = query_regkey(HKEY_LOCAL_MACHINE, szNotepadKey,
-		                   0,
-		                   &cmd[1], &siz);
+						   0,
+						   &cmd[1], &siz);
 		if (!res) {
 			siz--; /* terminating null */
 			strncpy(&cmd[1 + siz],
-			        "\\notepad++.exe", sizeof(cmd) - 2 - siz);
+					"\\notepad++.exe", sizeof(cmd) - 2 - siz);
 			found += !access(&cmd[1], 00);
 			cmd[1 + siz + sizeof("\\notepad++.exe") - 1] = '"';
 		}
@@ -121,12 +121,12 @@ WinMain(HINSTANCE hInstance,
 	if (!found && (bIsWow64 || __x86_64__)) {
 		siz = sizeof(cmd) - 3;
 		res = query_regkey(HKEY_LOCAL_MACHINE, szNotepadKey,
-		                   bIsWow64 ? KEY_WOW64_64KEY : KEY_WOW64_32KEY,
-		                   &cmd[1], &siz);
+						   bIsWow64 ? KEY_WOW64_64KEY : KEY_WOW64_32KEY,
+						   &cmd[1], &siz);
 		if (!res) {
 			siz--; /* terminating null */
 			strncpy(&cmd[1 + siz],
-			        "\\notepad++.exe", sizeof(cmd) - 2 - siz);
+					"\\notepad++.exe", sizeof(cmd) - 2 - siz);
 			found += !access(&cmd[1], 00);
 			cmd[1 + siz + sizeof("\\notepad++.exe") - 1] = '"';
 		}
@@ -139,7 +139,7 @@ WinMain(HINSTANCE hInstance,
 
 		if (!res) {
 			strncpy(&cmd[1 + siz],
-			        "\\Notepad++\\notepad++.exe", sizeof(cmd) - 2 - siz);
+					"\\Notepad++\\notepad++.exe", sizeof(cmd) - 2 - siz);
 			found += !access(&cmd[1], 00);
 			cmd[1 + siz + sizeof("\\Notepad++\\notepad++.exe") - 1] = '"';
 		}
@@ -152,7 +152,7 @@ WinMain(HINSTANCE hInstance,
 
 		if (!res) {
 			strncpy(&cmd[1 + siz],
-			        "\\Notepad++\\notepad++.exe", sizeof(cmd) - 2 - siz);
+					"\\Notepad++\\notepad++.exe", sizeof(cmd) - 2 - siz);
 			found += !access(&cmd[1], 00);
 			cmd[1 + siz + sizeof("\\Notepad++\\notepad++.exe") - 1] = '"';
 		}
@@ -163,32 +163,43 @@ WinMain(HINSTANCE hInstance,
 
 	/* Command-line construction. */
 	if (dwCmdLineLen) {
+		TCHAR lpCmdCpy[1024];
+		strcpy(lpCmdCpy, lpCmdLine);
+		for (int i = 0; lpCmdCpy[i]; i++) {
+			lpCmdCpy[i] = tolower(lpCmdCpy[i]);
+		}
+
+		if (strstr(lpCmdCpy, "notepad.exe") != NULL) {
+			lpCmdLine = strchr(lpCmdLine, ' ') + 1;
+			dwCmdLineLen = strlen(lpCmdLine);
+		}
+
 		strncat(cmd, " \"", sizeof(cmd) - strlen(cmd));
 		if (lpCmdLine[0] != '\"')
 			_fullpath(cmd + strlen(cmd), lpCmdLine,
-			          sizeof(cmd) - strlen(cmd));
+					  sizeof(cmd) - strlen(cmd));
 		else {
 			if (lpCmdLine[dwCmdLineLen - 1] == '\"')
 				lpCmdLine[dwCmdLineLen - 1] = '\0';
 			_fullpath(cmd + strlen(cmd), lpCmdLine + 1,
-			          sizeof(cmd) - strlen(cmd));
+					  sizeof(cmd) - strlen(cmd));
 		}
 		strncat(cmd, "\"", sizeof(cmd) - strlen(cmd));
 	}
 
 	/* Notepad++ launching. */
 	if (CreateProcess(
-	                  NULL,  /* No module name (use command line) */
-	                  cmd,   /* Command line */
-	                  NULL,  /* Process handle not inheritable */
-	                  NULL,  /* Thread handle not inheritable */
-	                  FALSE, /* Set handle inheritance to FALSE */
-	                  0,     /* No creation flags */
-	                  NULL,  /* Use parent's environment block */
-	                  NULL,  /* Use parent's starting directory */
-	                  &si,   /* Pointer to STARTUPINFO structure */
-	                  &pi    /* Pointer to PROCESS_INFORMATION structure */
-	    )
+					  NULL,  /* No module name (use command line) */
+					  cmd,   /* Command line */
+					  NULL,  /* Process handle not inheritable */
+					  NULL,  /* Thread handle not inheritable */
+					  FALSE, /* Set handle inheritance to FALSE */
+					  0,     /* No creation flags */
+					  NULL,  /* Use parent's environment block */
+					  NULL,  /* Use parent's starting directory */
+					  &si,   /* Pointer to STARTUPINFO structure */
+					  &pi    /* Pointer to PROCESS_INFORMATION structure */
+		)
 	   ) {
 
 		/* Przemoc's note:
@@ -206,7 +217,7 @@ WinMain(HINSTANCE hInstance,
 			if (dwProcessId == pi.dwProcessId) {
 				/* And move it to the top. */
 				SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0,
-				             SWP_NOMOVE | SWP_NOSIZE);
+							 SWP_NOMOVE | SWP_NOSIZE);
 				break;
 			}
 			hWnd = GetNextWindow(hWnd, GW_HWNDNEXT);
